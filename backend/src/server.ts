@@ -12,10 +12,6 @@ export function buildServer(): FastifyInstance {
     origin: true
   });
 
-  fastify.get("/", async () => {
-    return { status: "ok", message: "API do sistema rodando" };
-  });
-
   fastify.register(mongoPlugin);
   fastify.register(transactionRoutes);
 
