@@ -7,10 +7,8 @@ const BRANDS = ["Visa", "Mastercard", "Elo", "Amex"] as const;
 
 export function TransactionForm() {
   const dispatch = useAppDispatch();
-  const loadingCreate = useAppSelector(
-    (state) => state.transactions.loadingCreate
-  );
-  const apiError = useAppSelector((state) => state.transactions.error);
+  const loadingCreate = useAppSelector((s) => s.transactions.loadingCreate);
+  const apiError = useAppSelector((s) => s.transactions.error);
 
   const [form, setForm] = useState<CreateTransactionDTO>({
     pan: "",
@@ -40,15 +38,13 @@ export function TransactionForm() {
     setLocalError(null);
 
     if (!form.pan || form.pan.length !== 16) {
-      setLocalError("O PAN deve conter exatamente 16 dígitos numéricos.");
+      setLocalError("O PAN deve conter 16 dígitos numéricos.");
       return;
     }
-
-    if (!form.brand || !BRANDS.includes(form.brand as (typeof BRANDS)[number])) {
-      setLocalError("Selecione uma bandeira válida (Visa, Mastercard ou Elo).");
+    if (!form.brand) {
+      setLocalError("Selecione uma bandeira.");
       return;
     }
-
     if (!form.amount || form.amount <= 0) {
       setLocalError("O valor deve ser maior que zero.");
       return;
@@ -58,93 +54,132 @@ export function TransactionForm() {
       await dispatch(createTransactionThunk(form)).unwrap();
       setForm({ pan: "", brand: "", amount: 0 });
     } catch {
-      // erro já cai em apiError via slice
+      //erro cai no slicer
     }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full rounded-2xl bg-[#11181D]/90 p-6 shadow-xl border border-[#26343A] space-y-4"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h2 className="text-base sm:text-lg font-semibold text-accent">
-            Simular transação
+    <div className="w-full max-w-xl mx-auto">
+      <form
+        onSubmit={handleSubmit}
+        className="
+          bg-[#11181D] 
+          border border-[#26343A]
+          rounded-2xl 
+          p-8 
+          shadow-xl
+          space-y-6
+        "
+      >
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold text-[#A7E97F]">
+            Simular Transação
           </h2>
-          <p className="text-[11px] text-gray-300">
-            Informe os dados do cartão e o valor para testar o fluxo de
-            autorização.
+          <p className="text-xs text-gray-300">
+            Preencha os dados do cartão e o valor desejado.
           </p>
         </div>
-      </div>
 
-      <div className="grid gap-4">
-        <label className="flex flex-col gap-1 text-xs sm:text-sm">
-          PAN (16 dígitos)
-          <input
-            name="pan"
-            value={form.pan}
-            onChange={handleChange}
-            maxLength={16}
-            placeholder="4111111111111111"
-            className="p-2 rounded-lg bg-[#1A2429] text-text border border-transparent focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/60 text-sm"
-          />
-          <span className="text-[11px] text-gray-400">
-            O número não é armazenado em texto puro, apenas mascarado.
-          </span>
-        </label>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label className="flex flex-col gap-1 text-xs sm:text-sm">
-            Bandeira
-            <select
-              name="brand"
-              value={form.brand}
-              onChange={handleChange}
-              className="p-2 rounded-lg bg-[#1A2429] text-text border border-transparent focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/60 text-sm"
-            >
-              <option value="">Selecione</option>
-              {BRANDS.map((b) => (
-                <option key={b} value={b}>
-                  {b}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1 text-xs sm:text-sm">
-            Valor (R$)
+        <div className="space-y-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-200">PAN (16 dígitos)</label>
             <input
-              name="amount"
-              type="number"
-              min={0}
-              step={0.01}
-              value={form.amount || ""}
+              name="pan"
+              value={form.pan}
               onChange={handleChange}
-              className="p-2 rounded-lg bg-[#1A2429] text-text border border-transparent focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/60 text-sm"
-              placeholder="Ex: 500"
+              maxLength={16}
+              placeholder="4111111111111111"
+              className="
+                px-3 py-2 
+                rounded-lg 
+                bg-[#1A2429] 
+                text-[#ffffff]
+                border border-transparent
+                focus:border-[#A7E97F]
+                focus:outline-none
+                focus:ring-1 focus:ring-[#A7E97F]/60
+              "
             />
-          </label>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-gray-200">Bandeira</label>
+              <select
+                name="brand"
+                value={form.brand}
+                onChange={handleChange}
+                className="
+                  px-3 py-2 
+                  rounded-lg 
+                  bg-[#1A2429] 
+                  text-[#ffffff]
+                  border border-transparent
+                  focus:border-[#A7E97F]
+                  focus:outline-none
+                  focus:ring-1 focus:ring-[#A7E97F]/60
+                "
+              >
+                <option value="">Selecione</option>
+                {BRANDS.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-gray-200">Valor (R$)</label>
+              <input
+                name="amount"
+                type="number"
+                min={0}
+                step={0.01}
+                value={form.amount || ""}
+                onChange={handleChange}
+                placeholder="500"
+                className="
+                  px-3 py-2 
+                  rounded-lg 
+                  bg-[#1A2429] 
+                  text-[#ffffff]
+                  border border-transparent
+                  focus:border-[#A7E97F]
+                  focus:outline-none
+                  focus:ring-1 focus:ring-[#A7E97F]/60
+                "
+              />
+            </div>
+          </div>
         </div>
-      </div>
 
-      {localError && (
-        <p className="text-red-400 text-xs">{localError}</p>
-      )}
-      {apiError && (
-        <p className="text-red-400 text-xs">{apiError}</p>
-      )}
+        {(localError || apiError) && (
+          <div className="text-[#FF6B6B] text-sm border border-red-500/50 bg-red-500/10 p-2 rounded-lg">
+            {localError || apiError}
+          </div>
+        )}
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={loadingCreate}
-          className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-xs sm:text-sm font-semibold text-background shadow hover:brightness-110 active:scale-[0.98] transition disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {loadingCreate ? "Processando..." : "Enviar transação"}
-        </button>
-      </div>
-    </form>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={loadingCreate}
+            className="
+              bg-[#A7E97F] 
+              text-[#11181D] 
+              font-semibold 
+              px-5 py-2 
+              rounded-lg
+              hover:brightness-110
+              active:scale-95 
+              transition
+              disabled:opacity-60 disabled:cursor-not-allowed
+            "
+          >
+            {loadingCreate ? "Processando..." : "Enviar"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

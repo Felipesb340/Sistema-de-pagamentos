@@ -13,7 +13,7 @@ async function mongoConnector(fastify: FastifyInstance) {
 
   try {
     await mongoose.connect(uri);
-    fastify.log.info("✅ MongoDB conectado");
+    fastify.log.info("MongoDB conectado");
   } catch (error) {
     fastify.log.error("Erro ao conectar no MongoDB");
     fastify.log.error(error);
